@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <!-- 移动端适配，解决手机文字过大问题 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生日礼物惊喜</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+        body{
+            background-color:#ffc0cb;
+            min-height:100vh;
+            font-family:system-ui, sans-serif;
+            text-align:center;
+            overflow-x:hidden;
+        }
+        /*礼物盒样式*/
+        .giftBox{
+            margin-top:30vh;
+            font-size:120px;
+            cursor:pointer;
+            transition: transform 0.3s;
+        }
+        .giftBox:active{
+            transform: scale(0.95);
+        }
+        /*内容区域，默认隐藏*/
+        .content{
+            display:none;
+            padding:30px 15px;
+        }
+        .line{
+            border-top:2px dashed #333;
+            margin:30px 0;
+        }
+        .box-text{
+            font-size:clamp(1.5rem, 6vw, 2.5rem);
+            line-height:1.8;
+            font-weight:bold;
+            color:#000;
+        }
+        .icon{
+            font-size:60px;
+            margin-top:30px;
+        }
+        canvas{
+            position:fixed;
+            top:0;
+            left:0;
+            pointer-events:none;
+            z-index:99;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="fireCanvas"></canvas>
+    <!--礼物盒-->
+    <div class="giftBox" id="gift">🎁</div>
+    <!--惊喜文字内容-->
+    <div class="content" id="msg">
+        <div class="line"></div>
+        <div class="box-text">
+            礼物放在驿站了记得取呦<br><br>
+            综合体三楼兔喜快递超市<br><br>
+            取件码：19-3-4038
+        </div>
+        <div class="line"></div>
+        <div class="box-text" style="font-size:clamp(1.3rem,5vw,2rem)">
+            愿万事顺意，岁岁欢喜
+        </div>
+        <div class="icon">💌</div>
+    </div>
+
+<script>
+//烟花代码
+const canvas = document.getElementById('fireCanvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize',resizeCanvas);
+let particles = [];
+class Particle{
+    constructor(x,y){
+        this.x = x;
+        this.y = y;
+        this.speedX = (Math.random()-0.5)*8;
+        this.speedY = (Math.random()-0.5)*8;
+        this.alpha = 1;
+        this.color = `hsl(${Math.random()*360},100%,60%)`;
+        this.size = Math.random()*4+1;
+    }
+    update(){
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.alpha -= 0.015;
+    }
+    draw(){
+        ctx.save();
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+function createFire(x,y){
+    for(let i=0;i<80;i++){
+        particles.push(new Particle(x,y));
+    }
+}
+function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let i=particles.length-1;i>=0;i--){
+        particles[i].update();
+        particles[i].draw();
+        if(particles[i].alpha <= 0){
+            particles.splice(i,1);
+        }
+    }
+    requestAnimationFrame(animate);
+}
+animate();
+
+//点击礼物盒触发
+const gift = document.getElementById('gift');
+const msg = document.getElementById('msg');
+gift.onclick = function(){
+    createFire(window.innerWidth/2, window.innerHeight/2);
+    gift.style.display = "none";
+    msg.style.display = "block";
+}
+</script>
+</body>
+</html>
